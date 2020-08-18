@@ -1,5 +1,12 @@
-FROM jekyll/minimal:4.0
+FROM ruby:2.5
 
-COPY ./ /srv/jekyll
-CMD ["jekyll", "serve", "-P", "8080", "-H", "0.0.0.0"]
+WORKDIR /usr/jekyll-src
+COPY ./ .
 
+RUN gem update --system
+RUN bundle install
+RUN jekyll build
+
+FROM nginx
+COPY --from=0 /usr/jekyll-src/_site /usr/share/nginx/html
+CMD ["nginx", "-g", "daemon off;"]
